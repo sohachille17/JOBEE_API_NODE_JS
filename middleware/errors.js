@@ -1,3 +1,4 @@
+const ErrorHandler = require('../config/errorHandler');
 
 module.exports = (err, req, res, next) => {
 
@@ -20,6 +21,17 @@ module.exports = (err, req, res, next) => {
     }
    
     if(process.env.NODE_ENV === 'production'){
+
+        if(err.name === 'CastError'){
+            const message = `Resource not found . Invalid ${err.path}`
+            err = new ErrorHandler(message, 404);
+        }
+        if(err.name === 'ValidationError'){
+            const message = Object.values(err.errors).map(values =>
+                values.message
+            )
+            err = new ErrorHandler(message, 400)
+        }
         
         res.status(err.statusCode).json({
             success: false,
