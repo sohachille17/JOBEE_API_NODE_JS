@@ -36,6 +36,17 @@ app.use(errorMiddleware)
 
 
 const PORT = process.env.PORT;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server running on port num ${PORT} in ${process.env.NODE_ENV}`)
 });
+
+
+
+// 0 - unhandle promise rejection
+process.on("unhandleRejection", err => {
+    console.log(err.message)
+    console.log("Server shutting down due to handled promise rejection")
+    server.close(() => {
+        process.exit(1)
+    })
+})
