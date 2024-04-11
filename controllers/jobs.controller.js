@@ -2,10 +2,18 @@
 const { Jobs } = require("../model/job");
 const  ErrorHandler  = require("../config/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
+const ApiFilters = require("../config/apiFilters");
 
 exports.getJobs = async (req, res, next) => {
 
-    const jobs = await Jobs.find({})
+    const apiFilters = new ApiFilters(Jobs.find(), req.query)
+    .filters()
+    .sort()
+    .limitFields()
+    .searchByQuery()
+
+    //const jobs = await Jobs.find({})
+    const jobs = await apiFilters.query
     .select({applicantsApplied: 0})
     if(jobs) return res.status(200).json({
         success: true,
