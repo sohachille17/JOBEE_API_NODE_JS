@@ -11,6 +11,7 @@ exports.getJobs = async (req, res, next) => {
     .sort()
     .limitFields()
     .searchByQuery()
+    .pagination();
 
     //const jobs = await Jobs.find({})
     const jobs = await apiFilters.query
