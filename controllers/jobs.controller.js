@@ -3,6 +3,7 @@ const { Jobs } = require("../model/job");
 const  ErrorHandler  = require("../config/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ApiFilters = require("../config/apiFilters");
+const User = require("../model/user");
 
 exports.getJobs = async (req, res, next) => {
 
@@ -48,6 +49,17 @@ exports.getJob = catchAsyncErrors( async (req, res, next) => {
 
 // Create a job
 exports.createJob = catchAsyncErrors(async (req, res, next) => {
+
+    // getting creatorId
+    req.body.jobCreatorID = req.user.id
+   // getting current authenticated user who create the current job
+    let userID = req.user.id
+    const user = await User.findById(userID)
+    //console.log(user)
+    req.body.creatorName = user.name
+
+   // getting current authenticated user who create the current job
+
 
     const jobTitle = await Jobs.findOne({title: req.body.title })
     if(jobTitle)  return res.json({

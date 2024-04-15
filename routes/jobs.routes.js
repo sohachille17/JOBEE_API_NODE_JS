@@ -13,14 +13,20 @@ const {
 } = require("../controllers/jobs.controller");
 
 
-router.route('/jobs').get(getJobs);
-router.route("/jobs/:id/:slug").get(getJob);
-router.route("/jobs/stats/").get(getStats);
-router.route('/jobs').post(createJob);
+const { 
+    isAuthenticatedUser,
+    isAuthorizeRole 
+} = require("../middleware/auth");
+
+
+router.route('/jobs').get( isAuthenticatedUser,getJobs);
+router.route("/jobs/:id/:slug").get(isAuthenticatedUser,getJob);
+router.route("/jobs/stats/").get( isAuthenticatedUser , getStats);
+router.route('/jobs').post(isAuthenticatedUser,isAuthorizeRole("employer","admin"), createJob);
 
 router.route('/jobs/:id/')
-.put(updateJob)
-.delete(deleteJob)
+.put(isAuthenticatedUser, updateJob)
+.delete(isAuthenticatedUser, deleteJob)
 
 
 

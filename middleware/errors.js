@@ -32,6 +32,10 @@ module.exports = (err, req, res, next) => {
             )
             err = new ErrorHandler(message, 400)
         }
+        if(err.code === 11000){
+            const message = `The Email address || - ${err.keyValue.email} - || already exist in our database try a different want sorry!`;
+            err = new ErrorHandler(message, 400);
+        }
         
         res.status(err.statusCode).json({
             success: false,

@@ -121,6 +121,16 @@ const jobSchema = mongoose.Schema({
         type: [Object],
         select: true
 
+    },
+    jobCreatorID: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+        required: true
+    },
+    creatorName: {
+        type: String,
+        trim: true,
+        required: true
     }
 })
 

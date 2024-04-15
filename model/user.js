@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 const validator = require("validator")
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const userSchema = new mongoose.Schema({
 
     name: {
@@ -35,13 +38,54 @@ const userSchema = new mongoose.Schema({
         default: Date.now
     },
     resetPasswordToken: String,
-    resetPasswordExpiredDate: Date
+    resetPasswordExpired: Date
 
 
 })
 
-const User = mongoose.model('User', userSchema);
 
-module.exports = {
-    User
+// Encrypting password before saving
+userSchema.pre("save", async function(){
+    this.password = await bcrypt.hash(this.password, 10)
+})
+// Return JWT token
+userSchema.methods.getJwtToken = function(){
+    return jwt.sign(
+        { 
+            id: this._id,
+            name: this.name,
+            role: this.role
+        }
+        , process.env.JWT_SECRETE, {
+
+            expiresIn: process.env.JWT_EXPIRES_TIME
+
+        })
+        
 }
+
+// compared password
+userSchema.methods.comparedPassword = async function(enteredPassword){
+
+    return await bcrypt.compare(enteredPassword, this.password)
+
+}
+
+// Generate expires token
+userSchema.methods.getResetPasswordToken = function(){
+
+    // generating resetToken from crypto module
+    const resetToken = crypto.randomBytes(10).toString("hex");
+
+    // Hash and set to resetPasswordToken
+    this.resetPasswordToken = crypto.createHash("sha256")
+            .update(resetToken)
+            .digest("hex")
+
+    // set expiring time
+    this.resetPasswordExpired = Date.now() + 30*60*1000;
+    return resetToken;
+
+}
+
+module.exports = mongoose.model("User", userSchema);
